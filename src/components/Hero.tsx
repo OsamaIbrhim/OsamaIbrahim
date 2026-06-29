@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, CheckCircle2, Cpu, Code2, Database, Globe, Layers, Sparkles } from 'lucide-react';
+import osamaIcon from "/src/assets/images/os.ico"
 
 const codeSnippets = {
   typescript: `export const engineer = {
@@ -97,7 +98,7 @@ export default function Hero() {
               className="relative lg:hidden w-16 h-16 rounded-full border-2 border-brand-primary/30 p-0.5 overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.2)]"
             >
               <img
-                src="/src/assets/images/os.ico"
+                src={osamaIcon}
                 alt="Osama Ibrahim"
                 className="w-full h-full object-cover rounded-full"
                 referrerPolicy="no-referrer"

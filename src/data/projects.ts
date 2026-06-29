@@ -1,4 +1,10 @@
 import { Project } from '../types';
+import notImage from '/src/assets/images/Not.png'
+import bdpImage from '/src/assets/images/Not.png'
+import disneyImage from '/src/assets/images/disney.png'
+import youtubeImage from '/src/assets/images/youtube.png'
+import doctorImage from '/src/assets/images/Not.png'
+import educationImage from '/src/assets/images/Not.png'
 
 export const projects: Project[] = [
   {
@@ -8,7 +14,7 @@ export const projects: Project[] = [
     longDescription: 'A decentralized "Network of Trust" built on Ethereum. Smart contracts (Identity, CourseManagement, Certificates) handle role-based verification, institution-scoped course management, and reentrancy-protected certificate issuance, with certificate metadata linked to IPFS. A read-only Express API proxies on-chain view functions, while a React + Vite admin dashboard performs on-chain writes through MetaMask.',
     category: 'web3',
     tags: ['Solidity', 'Hardhat', 'Ethers.js', 'React', 'TypeScript', 'Express', 'MetaMask'],
-    image: '/src/assets/images/Not.png',
+    image: notImage,
     icon: 'token',
     githubUrl: 'https://github.com/OsamaIbrhim/Network-Of-Trust',
     liveUrl: '#',
@@ -28,7 +34,7 @@ export const projects: Project[] = [
     longDescription: 'A full-stack blood donation system with separate donor and hospital dashboards. Built on a React 19 + Vite + Tailwind frontend and an Express 5 + MongoDB backend, it provides JWT-based authentication with role-based redirection, real-time notifications via Socket.io, image uploads through Cloudinary, and email notifications with Nodemailer.',
     category: 'fullstack',
     tags: ['React', 'Express', 'MongoDB', 'Mongoose', 'Socket.io', 'JWT', 'Tailwind CSS'],
-    image: '/src/assets/images/Not.png',
+    image: bdpImage,
     icon: 'token',
     githubUrl: 'https://github.com/OsamaIbrhim/Blood-Donation-Platform',
     liveUrl: '#',
@@ -48,7 +54,7 @@ export const projects: Project[] = [
     longDescription: 'An interactive frontend heavy streaming clone replicating the sleek Disney+ user experience. Features active movie sliders, dynamic row categories pulling directly from live TMDB endpoints, search capability, and a user auth state managed through Redux and Firebase.',
     category: 'frontend',
     tags: ['React', 'Firebase', 'Redux', 'TMDB API', 'Styled Components'],
-    image: '/src/assets/images/disney.png',
+    image: disneyImage,
     icon: 'live_tv',
     liveUrl: '#',
     githubUrl: '#',
@@ -67,7 +73,7 @@ export const projects: Project[] = [
     longDescription: 'A fast, responsive streaming clone focused on video search and rich content navigation. Built with React and Material UI, it consumes the RapidAPI YouTube V3 endpoint to render HD video playback, related suggestions, channel statistics, and categorized video feeds across dedicated routed pages.',
     category: 'frontend',
     tags: ['React', 'Material UI', 'RapidAPI', 'React Router', 'Axios'],
-    image: '/src/assets/images/youtube.png',
+    image: youtubeImage,
     icon: 'play_circle',
     liveUrl: 'https://youtube-clone-blue-delta.vercel.app/',
     githubUrl: 'https://github.com/OsamaIbrhim/Youtube-clone',
@@ -87,7 +93,7 @@ export const projects: Project[] = [
     longDescription: 'A backend-focused REST API for managing doctors, patients, and appointments. Built with Express and MongoDB/Mongoose, it features JWT authentication, bcrypt password hashing, email integration via Nodemailer, input validation, and an automated test suite using Jest and Supertest.',
     category: 'backend',
     tags: ['Node.js', 'Express', 'MongoDB', 'Mongoose', 'JWT', 'Jest'],
-    image: '/src/assets/images/Not.png',
+    image: doctorImage,
     icon: 'token',
     githubUrl: 'https://github.com/OsamaIbrhim/Doctor-Api',
     liveUrl: '#',
@@ -107,7 +113,7 @@ export const projects: Project[] = [
     category: 'web3',
     tags: ['Next.js', 'TypeScript', 'Solidity', 'Hardhat', 'Truffle', 'Web3'],
     githubUrl: 'https://github.com/OsamaIbrhim/education-blockchain',
-    image: '/src/assets/images/Not.png',
+    image: educationImage,
     icon: 'token',
     liveUrl: '#',
     isUpcoming: true,
