@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Calendar, Cpu, Code2, Coins } from 'lucide-react';
+import osamaAvatar from '../assets/images/osama_avatar.png';
 
 export default function About() {
   const stats = [
@@ -55,7 +56,7 @@ export default function About() {
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-transparent to-transparent opacity-60 z-10" />
                 <div className="absolute inset-0 bg-brand-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none" />
                 <img
-                  src='/src/assets/images/osama_avatar.png'
+                  src={osamaAvatar}
                   alt="Osama Ibrahim"
                   className="bg-white/[0.02] backdrop-blur-md w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"

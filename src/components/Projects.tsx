@@ -1,7 +1,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { createPortal } from 'react-dom';
-import { ExternalLink, Code2, ChevronRight, X, Heart, Star, Send, Play, Layers, Box, Film, Volume2, Maximize, Code, Activity, Droplet, ShieldCheck } from 'lucide-react';
+import { ExternalLink, Code2, ChevronRight, X, Heart, Star, Send, Play, Layers, Box, Film, Volume2, Maximize, Code, Activity, Droplet, ShieldCheck, School, Server } from 'lucide-react';
 import { projects } from '../data/projects';
 import { Project } from '../types';
 
@@ -48,46 +48,6 @@ export default function Projects() {
       setWatchlist(watchlist.filter(item => item !== movie));
     } else {
       setWatchlist([...watchlist, movie]);
-    }
-  };
-
-  const handleMintCertificate = (e: FormEvent) => {
-    e.preventDefault();
-    if (!studentName.trim()) return;
-    setIsMinting(true);
-    setTimeout(() => {
-      setIsMinting(false);
-      setMintedCert(`CERT-TX-0x${Math.random().toString(16).slice(2, 10).toUpperCase()}`);
-    }, 1800);
-  };
-
-  const handleEndpointSelect = (endpoint: string) => {
-    setSelectedEndpoint(endpoint);
-    if (endpoint === 'GET /api/products') {
-      setApiResponse({
-        status: 'success',
-        results: 3,
-        data: [
-          { id: '1', name: 'Premium Mechanical Keyboard', price: 129.99, stock: 45 },
-          { id: '2', name: 'Ultra-Wide Gaming Monitor 34"', price: 449.99, stock: 12 },
-          { id: '3', name: 'Ergonomic Standing Desk', price: 299.99, stock: 18 }
-        ]
-      });
-    } else if (endpoint === 'POST /api/orders') {
-      setApiResponse({
-        status: 'created',
-        message: 'Order verified and processed successfully',
-        orderId: `ORD-${Math.floor(Math.random() * 90000) + 10000}`,
-        total: 129.99,
-        paymentStatus: 'Paid'
-      });
-    } else {
-      setApiResponse({
-        status: 'success',
-        user: 'Osama Ibrahim',
-        role: 'Administrator',
-        tokenType: 'Bearer JWT_SECRET_TOKEN_ROTATION_ROTATED'
-      });
     }
   };
 
@@ -238,9 +198,9 @@ export default function Projects() {
                               </div>
                             </div>
                             <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <span className="material-symbols-outlined text-6xl text-secondary drop-shadow-[0_0_15px_rgba(169,199,255,0.5)] scale-75 group-hover:scale-150 transition-transform duration-500">
+                              <Film className="text-6xl text-secondary drop-shadow-[0_0_15px_rgba(169,199,255,0.5)] scale-75 group-hover:scale-150 transition-transform duration-500">
                                 movie
-                              </span>
+                              </Film>
                             </div>
                           </div>
                         )}
@@ -250,7 +210,7 @@ export default function Projects() {
                           <div className="relative z-10 w-full h-full border border-white/10 rounded-xl bg-surface-container/40 backdrop-blur-sm overflow-hidden flex flex-col justify-end p-3">
                             <div className="absolute inset-0 flex items-center justify-center">
                               <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20">
-                                <span className="material-symbols-outlined text-white pl-1">play_arrow</span>
+                                <Play className="material-symbols-outlined text-white pl-1">play_arrow</Play>
                               </div>
                             </div>
                             <div className="w-full h-1 bg-white/10 rounded-full mb-3 relative">
@@ -294,7 +254,6 @@ export default function Projects() {
                         {/* Render Education Blockchain Mockup */}
                         {isEduChain && (
                           <div className="relative z-10 w-full h-full border border-white/10 rounded-xl bg-surface-container/30 backdrop-blur-sm flex items-center justify-center overflow-hidden">
-                            {/* سلسلة بلوكات متصلة في الخلفية */}
                             <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-20">
                               {[0, 1, 2, 3].map((i) => (
                                 <div key={i} className="flex items-center">
@@ -304,9 +263,9 @@ export default function Projects() {
                               ))}
                             </div>
 
-                            <span className="material-symbols-outlined text-6xl text-primary drop-shadow-[0_0_15px_rgba(0,210,255,0.5)] group-hover:scale-110 transition-transform duration-500 relative z-10">
+                            <School className="text-6xl text-primary drop-shadow-[0_0_15px_rgba(0,210,255,0.5)] group-hover:scale-110 transition-transform duration-500 relative z-10">
                               school
-                            </span>
+                            </School>
                           </div>
                         )}
 
@@ -334,9 +293,9 @@ export default function Projects() {
                               </div>
                             </div>
                             <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <span className="material-symbols-outlined text-6xl text-tertiary drop-shadow-[0_0_15px_rgba(0,210,255,0.5)] scale-75 group-hover:scale-100 transition-transform duration-500">
+                              <Server className="text-6xl text-tertiary drop-shadow-[0_0_15px_rgba(0,210,255,0.5)] scale-75 group-hover:scale-100 transition-transform duration-500">
                                 api
-                              </span>
+                              </Server>
                             </div>
                           </div>
                         )}
@@ -375,14 +334,14 @@ export default function Projects() {
                             onClick={() => setSelectedProject(project)}
                             className={`flex-1 bg-surface-container border border-white/5 ${btnHoverClass} text-sm font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer`}
                           >
-                            <span className="material-symbols-outlined text-lg">open_in_new</span> Live Demo
+                            <ExternalLink  className=" text-lg">open_in_new</ExternalLink> Live Demo
                           </button>
                           <a
                             href={project.githubUrl}
                             className="w-12 h-10 bg-surface-container hover:bg-surface-container-high border border-white/5 text-on-surface-variant hover:text-on-surface rounded-lg flex items-center justify-center transition-all duration-300 cursor-pointer"
                             title="GitHub Repository"
                           >
-                            <span className="material-symbols-outlined text-lg">code</span>
+                            <Code  className="material-symbols-outlined text-lg">code</Code >
                           </a>
                         </div>
                       </div>
