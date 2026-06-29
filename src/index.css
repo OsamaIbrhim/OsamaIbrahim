@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-bg: #020205;
+  --color-brand-primary: #8b5cf6;
+  --color-brand-secondary: #06b6d4;
+  --color-brand-tertiary: #d946ef;
+  --color-brand-surface: #0a0915;
+  --color-brand-surface-high: #141226;
+
+  --color-surface-container: #0e0d1e;
+  --color-surface-container-lowest: #05040a;
+  --color-surface-container-high: #1c1a36;
+  --color-background: #020205;
+  --color-primary: #8b5cf6;
+  --color-secondary: #06b6d4;
+  --color-tertiary: #d946ef;
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #94a3b8;
+
+  --font-headline-lg: "Plus Jakarta Sans", sans-serif;
+  --font-headline-md: "Plus Jakarta Sans", sans-serif;
+  --text-headline-lg: 2.5rem;
+  --text-headline-md: 1.5rem;
+}
+
+/* Custom Utilities */
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 75% 25%, rgba(93, 63, 211, 0.18) 0%, transparent 60%), 
+              radial-gradient(circle at 20% 75%, rgba(6, 182, 212, 0.14) 0%, transparent 55%),
+              radial-gradient(circle at 50% 50%, rgba(13, 8, 30, 0.6) 0%, #020205 100%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.label-caps {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, #c084fc, #8b5cf6, #06b6d4);
+}
+
+.text-gradient-purple {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(90deg, #d946ef, #f472b6, #c084fc);
+}
+
+.bg-gradient-premium {
+  background: radial-gradient(circle at 50% -10%, rgba(139, 92, 246, 0.1) 0%, rgba(2, 2, 5, 1) 75%);
+}
+
+.glow-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 35px rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+  transform: translateY(-4px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #020205;
+}
+::-webkit-scrollbar-thumb {
+  background: #141226;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #231f3d;
+}
+
+/* Slim scrollbar utility */
+.scrollbar-thin {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 99px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5) !important;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #020205;
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: #141226 #020205;
+}
+

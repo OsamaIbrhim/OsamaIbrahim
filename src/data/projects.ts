@@ -1,0 +1,121 @@
+import { Project } from '../types';
+
+export const projects: Project[] = [
+  {
+    id: 'not',
+    title: 'Network of Trust',
+    description: 'A full-stack blockchain platform for issuing tamper-proof academic credentials, where only verified institutions can mint certificates to registered students on-chain.',
+    longDescription: 'A decentralized "Network of Trust" built on Ethereum. Smart contracts (Identity, CourseManagement, Certificates) handle role-based verification, institution-scoped course management, and reentrancy-protected certificate issuance, with certificate metadata linked to IPFS. A read-only Express API proxies on-chain view functions, while a React + Vite admin dashboard performs on-chain writes through MetaMask.',
+    category: 'web3',
+    tags: ['Solidity', 'Hardhat', 'Ethers.js', 'React', 'TypeScript', 'Express', 'MetaMask'],
+    image: '/src/assets/images/Not.png',
+    icon: 'token',
+    githubUrl: 'https://github.com/OsamaIbrhim/Network-Of-Trust',
+    liveUrl: '#',
+    isUpcoming: true,
+    highlights: [
+      'Authored Solidity contracts for identity, course management, and certificate issuance with reentrancy protection.',
+      'Implemented role-based access so only verified institutions can mint credentials to registered students.',
+      'Linked certificate metadata to IPFS hashes for tamper-proof off-chain document storage.',
+      'Built a read-only Express API that proxies on-chain view functions for fast frontend reads.',
+      'Developed a React + Vite + TypeScript admin dashboard with MetaMask for on-chain writes.'
+    ],
+  },
+  {
+    id: 'blood-donation-platform',
+    title: 'Blood Donation Platform',
+    description: 'A MERN platform connecting blood donors with hospitals, featuring role-based dashboards, real-time updates, and secure authentication.',
+    longDescription: 'A full-stack blood donation system with separate donor and hospital dashboards. Built on a React 19 + Vite + Tailwind frontend and an Express 5 + MongoDB backend, it provides JWT-based authentication with role-based redirection, real-time notifications via Socket.io, image uploads through Cloudinary, and email notifications with Nodemailer.',
+    category: 'fullstack',
+    tags: ['React', 'Express', 'MongoDB', 'Mongoose', 'Socket.io', 'JWT', 'Tailwind CSS'],
+    image: '/src/assets/images/Not.png',
+    icon: 'token',
+    githubUrl: 'https://github.com/OsamaIbrhim/Blood-Donation-Platform',
+    liveUrl: '#',
+    isUpcoming: true,
+    highlights: [
+      'Designed donor and hospital dashboards with user-specific stats and actions.',
+      'Implemented JWT authentication with role-based redirection and bcrypt password hashing.',
+      'Added real-time updates using Socket.io and toast notifications for instant feedback.',
+      'Integrated Cloudinary for image uploads and Nodemailer for email notifications.',
+      'Secured the API with Helmet, CORS, and express-validator input validation.'
+    ],
+  },
+  {
+    id: 'disney-clone',
+    title: 'Disney+ Clone',
+    description: 'Full-stack streaming platform clone with user authentication, dynamic content fetching from TMDB, and responsive UI.',
+    longDescription: 'An interactive frontend heavy streaming clone replicating the sleek Disney+ user experience. Features active movie sliders, dynamic row categories pulling directly from live TMDB endpoints, search capability, and a user auth state managed through Redux and Firebase.',
+    category: 'frontend',
+    tags: ['React', 'Firebase', 'Redux', 'TMDB API', 'Styled Components'],
+    image: '/src/assets/images/disney.png',
+    icon: 'live_tv',
+    liveUrl: '#',
+    githubUrl: '#',
+    highlights: [
+      'Designed stunning pixel-perfect glassmorphic slider animations using CSS Transitions.',
+      'Configured multi-page routing and nested dynamic routes using React Router.',
+      'Managed global play queues and user profiles utilizing highly optimized Redux actions.',
+      'Enabled Google Sign-In and profile database persistence through Google Firebase Auth.'
+    ],
+    isUpcoming: true,
+  },
+  {
+    id: 'youtube-clone',
+    title: 'YouTube Clone',
+    description: 'Video sharing application featuring video playback, searching, category filtering, and channel pages powered by the RapidAPI YouTube V3 service.',
+    longDescription: 'A fast, responsive streaming clone focused on video search and rich content navigation. Built with React and Material UI, it consumes the RapidAPI YouTube V3 endpoint to render HD video playback, related suggestions, channel statistics, and categorized video feeds across dedicated routed pages.',
+    category: 'frontend',
+    tags: ['React', 'Material UI', 'RapidAPI', 'React Router', 'Axios'],
+    image: '/src/assets/images/youtube.png',
+    icon: 'play_circle',
+    liveUrl: 'https://youtube-clone-blue-delta.vercel.app/',
+    githubUrl: 'https://github.com/OsamaIbrhim/Youtube-clone',
+    highlights: [
+      'Built a fully responsive video grid layout using Material UI (MUI v5) components and the sx styling system.',
+      'Implemented HD video playback with React Player, supporting native play, pause, and seek controls.',
+      'Integrated the RapidAPI YouTube V3 API via Axios to fetch videos, channels, and search results.',
+      'Structured multi-page navigation (feed, video detail, channel, and search pages) with React Router v6.',
+      'Designed a clean YouTube-inspired dark UI with a categorized sidebar and live search bar.'
+    ],
+    isUpcoming: false,
+  },
+  {
+    id: 'doctor-api',
+    title: 'Doctor Booking REST API',
+    description: 'A secure, tested REST API backend for a medical booking system, built with Express and MongoDB.',
+    longDescription: 'A backend-focused REST API for managing doctors, patients, and appointments. Built with Express and MongoDB/Mongoose, it features JWT authentication, bcrypt password hashing, email integration via Nodemailer, input validation, and an automated test suite using Jest and Supertest.',
+    category: 'backend',
+    tags: ['Node.js', 'Express', 'MongoDB', 'Mongoose', 'JWT', 'Jest'],
+    image: '/src/assets/images/Not.png',
+    icon: 'token',
+    githubUrl: 'https://github.com/OsamaIbrhim/Doctor-Api',
+    liveUrl: '#',
+    isUpcoming: true,
+    highlights: [
+      'Designed RESTful endpoints for doctors, patients, and appointment booking.',
+      'Implemented JWT authentication with bcrypt password hashing and Helmet security headers.',
+      'Added email workflows with Nodemailer and validation with the validator library.',
+      'Wrote integration tests using Jest and Supertest for reliable API behavior.'
+    ],
+  },
+  {
+    id: 'education-blockchain',
+    title: 'Decentralized University System',
+    description: 'A Next.js + Solidity DApp for a decentralized university, managing academic records and credentials on the blockchain.',
+    longDescription: 'A decentralized university system combining a Next.js + TypeScript frontend with Solidity smart contracts (developed and tested via Hardhat & Truffle). It manages academic records and credentials on-chain with Web3 wallet integration, multi-language (i18n) support, and a service-oriented frontend architecture.',
+    category: 'web3',
+    tags: ['Next.js', 'TypeScript', 'Solidity', 'Hardhat', 'Truffle', 'Web3'],
+    githubUrl: 'https://github.com/OsamaIbrhim/education-blockchain',
+    image: '/src/assets/images/Not.png',
+    icon: 'token',
+    liveUrl: '#',
+    isUpcoming: true,
+    highlights: [
+      'Built a Next.js + TypeScript frontend with a service-oriented architecture and React context state.',
+      'Developed and tested Solidity smart contracts using both Hardhat and Truffle toolchains.',
+      'Integrated Web3 wallet connectivity for on-chain academic record management.',
+      'Added internationalization (i18n) support for a multi-language user experience.'
+    ],
+  }
+];
