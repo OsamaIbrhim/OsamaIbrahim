@@ -97,7 +97,7 @@ export default function Hero() {
               className="relative lg:hidden w-16 h-16 rounded-full border-2 border-brand-primary/30 p-0.5 overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.2)]"
             >
               <img
-                src="/src/assets/images/osama_avatar.png"
+                src="/src/assets/images/os.ico"
                 alt="Osama Ibrahim"
                 className="w-full h-full object-cover rounded-full"
                 referrerPolicy="no-referrer"

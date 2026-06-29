@@ -67,7 +67,7 @@ export default function Navbar() {
           className="flex items-center gap-2.5 font-display text-xl font-bold text-white tracking-tight group"
         >
           <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-[#020205] font-extrabold text-lg shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-transform duration-300 group-hover:scale-105">
-            O
+            OI
           </div>
           <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:to-brand-primary transition-colors duration-300">
             Osama Ibrahim
