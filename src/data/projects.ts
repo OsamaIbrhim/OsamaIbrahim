@@ -1,10 +1,10 @@
 import { Project } from '../types';
 import notImage from '/src/assets/images/Not.png'
-import bdpImage from '/src/assets/images/Not.png'
+import bdpImage from '/src/assets/images/bdp.png'
 import disneyImage from '/src/assets/images/disney.png'
 import youtubeImage from '/src/assets/images/youtube.png'
-import doctorImage from '/src/assets/images/Not.png'
-import educationImage from '/src/assets/images/Not.png'
+import doctorImage from '/src/assets/images/doctorAPI.png'
+import educationImage from '/src/assets/images/education.png'
 
 export const projects: Project[] = [
   {
