@@ -1,16 +1,98 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="/src/assets/images/os.ico" />
-    <link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <title>Osama Ibrahim</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon-dark.svg" />
+    <title>Osama Ibrahim · Software Engineer & Full-Stack Developer</title>
+    <meta
+      name="description"
+      content="Osama Ibrahim is a software engineer and full-stack developer from Egypt, building with TypeScript, Node.js, React and MongoDB. Creator of Nook and @osamaibrahim/rate-limiter."
+    />
+    <meta name="theme-color" content="#0c0e0d" />
+    <link rel="canonical" href="https://osamaibrhim.github.io/OsamaIbrahim/" />
+    <meta name="author" content="Osama Ibrahim" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Osama Ibrahim" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Osama Ibrahim · Software Engineer & Full-Stack Developer" />
+    <meta
+      property="og:description"
+      content="Software engineer and full-stack developer. Every section of this portfolio is a block, mined live in your browser with SHA-256. Change a sentence and watch the chain break."
+    />
+    <meta property="og:url" content="https://osamaibrhim.github.io/OsamaIbrahim/" />
+    <meta property="og:image" content="https://osamaibrhim.github.io/OsamaIbrahim/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Osama Ibrahim · Software Engineer & Full-Stack Developer" />
+    <meta name="twitter:description" content="Software engineer and full-stack developer. Every section of this portfolio is a block, mined live in your browser with SHA-256." />
+    <meta name="twitter:image" content="https://osamaibrhim.github.io/OsamaIbrahim/og.jpg" />
+    <link rel="preload" href="/fonts/Zodiak-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Zodiak-Italic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Ranade-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/GeistMono-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+      // The tab icon and the browser's toolbar colour follow the site theme.
+      (function () {
+        var root = document.documentElement;
+        var sync = function () {
+          var t = root.dataset.theme === 'light' ? 'light' : 'dark';
+          var icon = document.querySelector('link[rel="icon"]');
+          if (icon) icon.href = icon.href.replace(/favicon-(dark|light)\.svg/, 'favicon-' + t + '.svg');
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.content = t === 'light' ? '#efe9dd' : '#0c0e0d';
+        };
+        sync();
+        new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Osama Ibrahim",
+        "alternateName": "أسامة إبراهيم",
+        "jobTitle": "Software Engineer",
+        "description": "Software engineer and full-stack developer building with TypeScript, Node.js, React and MongoDB.",
+        "url": "https://osamaibrhim.github.io/OsamaIbrahim/",
+        "image": "https://osamaibrhim.github.io/OsamaIbrahim/og.jpg",
+        "email": "mailto:osamaibrahim.dev@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Tanta",
+          "addressCountry": "EG"
+        },
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "Menoufia University"
+        },
+        "knowsAbout": [
+          "TypeScript",
+          "JavaScript",
+          "Node.js",
+          "Express",
+          "React",
+          "MongoDB",
+          "REST APIs",
+          "Full-stack development"
+        ],
+        "sameAs": [
+          "https://github.com/OsamaIbrhim",
+          "https://www.linkedin.com/in/osamaibrhim",
+          "https://www.npmjs.com/package/@osamaibrahim/rate-limiter"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

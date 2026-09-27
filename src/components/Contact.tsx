@@ -1,35 +1,17 @@
-import { useState, FormEvent } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Mail, MapPin, Send, CheckCircle, Linkedin, Github, RefreshCw, Copy, Check, MessageCircle } from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { AnimatePresence, m } from 'motion/react';
+import { ArrowUpRight, Check, Copy, Github, Linkedin } from 'lucide-react';
+import { PROFILE } from '../data/profile';
+import { DIFFICULTY, hashingAvailable, mine, pad2, sha256, shortHash, useLedger } from '../lib/ledger';
 
-export default function Contact() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [copiedEmail, setCopiedEmail] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
-  const EMAIL = 'osamaibrahim1948@gmail.com';
-  const WHATSAPP = '201024276623';
-  const WHATSAPP_DISPLAY = '+20 102 4276 623';
+const WEB3FORMS_KEY = '409609cb-2ca7-414a-971b-46f369a1fd33';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const [formState, setFormState] = useState<'idle' | 'submitting' | 'success'>('idle');
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+type Phase = 'idle' | 'mining' | 'sent' | 'error';
 
-  const validateForm = () => {
-    const newErrors: { name?: string; email?: string; message?: string } = {};
-    if (!name.trim()) newErrors.name = 'Please provide your name.';
-    if (!email.trim()) {
-      newErrors.email = 'Please provide your email address.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Please enter a valid email address.';
-    }
-    if (!message.trim()) newErrors.message = 'Please type a brief message.';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCopyText = async (text: string, setFlag: (v: boolean) => void) => {
+function useCopy() {
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
@@ -40,362 +22,333 @@ export default function Contact() {
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
-    setFlag(true);
-    setTimeout(() => setFlag(false), 2000);
+    setCopied(text);
+    setTimeout(() => setCopied((c) => (c === text ? null : c)), 1800);
+  };
+  return { copied, copy };
+}
+
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[0.12em] text-faint"
+      >
+        {label}
+        {error && <span className="normal-case tracking-normal text-danger">{error}</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const inputCls =
+  'mt-2 w-full border-0 border-b border-line-strong bg-transparent px-0 py-3 text-lg text-text placeholder:text-faint focus:border-accent focus:outline-none focus:ring-0 transition-colors';
+
+export default function Contact() {
+  const { head, blocks } = useLedger();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [hash, setHash] = useState('');
+  const [nonce, setNonce] = useState(0);
+  const { copied, copy } = useCopy();
+  const attempt = useRef(0);
+
+  const index = blocks.length;
+  const payload = `${index}|Message|${head}|${name}|${email}|${message}|`;
+
+  // The pending block's hash follows every keystroke.
+  useEffect(() => {
+    if (!hashingAvailable || phase === 'mining' || phase === 'sent') return;
+    let alive = true;
+    sha256(payload + 0).then((h) => {
+      if (!alive) return;
+      setHash(h);
+      setNonce(0);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [payload, phase]);
+
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!name.trim()) e.name = 'Your name, please';
+    if (!email.trim()) e.email = 'Needed to reply';
+    else if (!EMAIL_RE.test(email)) e.email = 'That address looks off';
+    if (!message.trim()) e.message = 'Say a little something';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleSendMessage = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const onSubmit = async (ev: FormEvent) => {
+    ev.preventDefault();
+    if (phase === 'mining' || !validate()) return;
+    const id = ++attempt.current;
+    const current = () => attempt.current === id;
+    setPhase('mining');
 
-    setFormState('submitting');
-
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
+    const send = fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          access_key: '2a956b8e-98f0-4d4b-9512-52e4723f225c',
+          access_key: WEB3FORMS_KEY,
           name,
           email,
           message,
           subject: `New portfolio message from ${name}`,
         }),
-      });
+      }).then((r) => r.json() as Promise<{ success?: boolean }>);
 
-      const data = await res.json();
+    // Mine the visitor's message into the chain while it is being delivered.
+    const seal = hashingAvailable
+      ? mine(
+          payload,
+          (n, h) => {
+            setNonce(n);
+            setHash(h);
+          },
+          () => !current(),
+          10,
+        ).then((r) => {
+          setNonce(r.nonce);
+          setHash(r.hash);
+        })
+      : Promise.resolve();
 
-      if (data.success) {
-        setFormState('success');
-        setName('');
-        setEmail('');
-        setMessage('');
-      } else {
-        setFormState('idle');
-        alert('Something went wrong. Please try again.');
-      }
+    try {
+      const [res] = await Promise.all([send, seal]);
+      if (!current()) return;
+      if (!res.success) throw new Error('rejected');
+      setPhase('sent');
+      setName('');
+      setEmail('');
+      setMessage('');
     } catch {
-      setFormState('idle');
-      alert('Network error. Please try again.');
+      if (!current()) return;
+      attempt.current++; // stop the miner if the send failed first
+      setPhase('error');
     }
   };
 
+  const stateLabel =
+    phase === 'sent' ? '✓ confirmed' : phase === 'mining' ? '⛏ mining' : phase === 'error' ? '✕ not sent' : '○ pending';
+  const stateColor =
+    phase === 'sent' ? 'var(--accent)' : phase === 'mining' ? 'var(--warn)' : phase === 'error' ? 'var(--danger)' : 'var(--muted)';
+
   return (
-    <section id="contact" className="py-24 relative overflow-hidden">
-      {/* Ambient background colors */}
-      <div className="absolute left-[-200px] bottom-[-200px] w-[600px] h-[600px] bg-brand-primary/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute right-[-100px] top-[10%] w-[400px] h-[400px] bg-brand-tertiary/5 rounded-full blur-[110px] pointer-events-none" />
+    <section
+      id="contact"
+      aria-label="Contact"
+      className="relative mx-auto max-w-[1320px] px-4 sm:px-6 lg:grid lg:grid-cols-[136px_minmax(0,1fr)] lg:px-10"
+    >
+      <div aria-hidden className="relative hidden lg:block">
+        <div className="absolute right-[35px] top-0 h-24 border-l border-dashed border-line-strong" />
+        <div className="sticky top-28 flex items-start justify-end gap-3 pr-[24px] pt-[3px]">
+          <div className="pt-[1px] text-right font-mono text-[11px] leading-tight text-muted">
+            <div className="text-text">#{pad2(index)}</div>
+            <div className="mt-1 uppercase tracking-[0.1em]">Contact</div>
+          </div>
+          <div className="relative z-10 grid shrink-0 h-[23px] w-[23px] place-items-center rounded-full border border-dashed border-line-strong bg-bg">
+            <span className="h-[7px] w-[7px] rounded-full" style={{ background: stateColor }} />
+          </div>
+        </div>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-8 relative z-10">
-
-        {/* Header Block */}
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-white tracking-tight">
-            Let's Build Something Great Together
-          </h2>
-          <p className="font-sans text-white/60 text-base sm:text-lg max-w-2xl mx-auto">
-            Have an open opportunity, a project concept, or just want to discuss Web3 architecture? Drop me a message.
-          </p>
+      <div className="min-w-0 pb-24">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-dashed border-line-strong py-3 font-mono text-[11px] text-muted">
+          <span className="text-text">
+            <span className="lg:hidden">#{pad2(index)} · </span>BLOCK · YOUR MESSAGE
+          </span>
+          <span className="whitespace-nowrap">
+            <span className="text-faint">prev </span>
+            <span className="tabular">{shortHash(head, 6, 4)}</span>
+          </span>
+          <span className="whitespace-nowrap">
+            <span className="text-faint">nonce </span>
+            <span className="tabular">{nonce}</span>
+          </span>
+          <span className="whitespace-nowrap">
+            <span className="text-faint">hash </span>
+            <span
+              className="tabular"
+              style={{ color: hash.startsWith(DIFFICULTY) && phase !== 'idle' ? 'var(--accent)' : undefined }}
+            >
+              {shortHash(hash, 8, 6)}
+            </span>
+          </span>
+          <span className="ml-auto whitespace-nowrap" style={{ color: stateColor }}>
+            {stateLabel}
+          </span>
         </div>
 
-        {/* Contact Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid gap-16 pt-10 sm:pt-14 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <p className="eyebrow">Contact</p>
+            <h2 data-split className="display mt-5 text-[clamp(2.8rem,6.5vw,5.75rem)]">
+              Add the
+              <br />
+              <em>next block.</em>
+            </h2>
+            <p className="mt-6 max-w-[34ch] text-[1.0625rem] leading-relaxed text-muted">
+              A role, a project, or just a question: write it below. Your message is hashed onto this page’s
+              chain as you type, mined when you send it, and delivered to my inbox.
+            </p>
 
-          {/* Left Column: Info cards */}
-          <div className="lg:col-span-5 space-y-6">
-            <h3 className="font-serif text-2xl font-light text-white tracking-tight mb-4">
-              Direct Contact Details
-            </h3>
-
-            {/* Email card */}
-            <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-start gap-4 hover:border-brand-primary/20 transition-all">
-              <div className="relative group/icon shrink-0">
-                <div className="p-3 bg-brand-primary/10 rounded-xl border border-brand-primary/15 text-brand-primary cursor-pointer">
-                  <Mail className="w-5 h-5" />
-                </div>
-
-                <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-brand-surface border border-white/10 text-white text-xs whitespace-nowrap opacity-0 translate-y-1 group-hover/icon:opacity-100 group-hover/icon:translate-y-0 transition-all duration-200 shadow-xl z-20">
-                  {EMAIL}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-brand-surface border-r border-b border-white/10 rotate-45 -mt-1" />
-                </div>
-              </div>
-
-              <div className="space-y-1 flex-1 min-w-0">
-                <span className="label-caps !text-[9px] text-white/50 block">Email Address</span>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`mailto:${EMAIL}`}
-                    className="block text-white font-semibold text-sm sm:text-base hover:text-brand-primary transition-colors hover:underline truncate"
-                  >
-                    {EMAIL}
-                  </a>
+            <div className="mt-12 border-t border-line">
+              {[
+                { k: 'Email', v: PROFILE.email, href: `mailto:${PROFILE.email}`, copyText: PROFILE.email, external: false },
+                {
+                  k: 'WhatsApp',
+                  v: PROFILE.whatsappDisplay,
+                  href: `https://wa.me/${PROFILE.whatsapp}`,
+                  copyText: PROFILE.whatsappDisplay,
+                  external: true,
+                },
+              ].map((row) => (
+                <div key={row.k} className="flex items-center justify-between gap-4 border-b border-line py-4">
+                  <div className="min-w-0">
+                    <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">{row.k}</div>
+                    <a
+                      href={row.href}
+                      target={row.external ? '_blank' : undefined}
+                      rel="noreferrer"
+                      className="link-underline mt-1 inline-block max-w-full truncate text-text"
+                    >
+                      {row.v}
+                    </a>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => handleCopyText(EMAIL, setCopiedEmail)}
-                    title="Copy email"
-                    className="shrink-0 p-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-brand-primary/40 text-white/60 hover:text-brand-primary transition-all cursor-pointer"
+                    onClick={() => copy(row.copyText)}
+                    aria-label={`Copy ${row.k}`}
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line-strong text-muted transition-colors hover:border-text hover:text-text"
                   >
-                    {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied === row.copyText ? <Check className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4" />}
                   </button>
                 </div>
-
-                <AnimatePresence>
-                  {copiedEmail && (
-                    <motion.span
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="text-[10px] text-emerald-400 font-semibold block"
-                    >
-                      Copied to clipboard!
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
+              ))}
             </div>
 
-            {/* Location card */}
-            <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-start gap-4 hover:border-brand-primary/20 transition-all">
-              <div className="p-3 bg-brand-secondary/10 rounded-xl border border-brand-secondary/15 text-brand-secondary shrink-0">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <span className="label-caps !text-[9px] text-white/50 block">Current Location</span>
-                <p className="text-white font-semibold text-sm sm:text-base">
-                  Egypt (Open to Remote & Relocation)
-                </p>
-              </div>
-            </div>
-
-            {/* Social profiles row */}
-            <div className="glass-panel p-6 rounded-2xl border border-white/5 space-y-4 hover:border-brand-primary/20 transition-all">
-              <span className="label-caps !text-[9px] text-white/50 block">Social Channels</span>
-              <div className="flex gap-4">
+            <div className="mt-6 flex flex-wrap gap-2">
+              {[
+                { label: 'LinkedIn', href: PROFILE.linkedin, icon: <Linkedin className="h-4 w-4" /> },
+                { label: 'GitHub', href: PROFILE.github, icon: <Github className="h-4 w-4" /> },
+                { label: 'npm', href: PROFILE.npm, icon: null },
+              ].map((s) => (
                 <a
-                  href="https://www.linkedin.com/in/osamaibrhim"
+                  key={s.label}
+                  href={s.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-11 h-11 bg-white/5 border border-white/10 hover:border-brand-primary/40 hover:text-brand-primary text-white/70 rounded-xl flex items-center justify-center transition-all cursor-pointer"
-                  title="LinkedIn Profile"
+                  className="inline-flex items-center gap-2 rounded-full border border-line-strong px-4 py-2 text-sm text-text transition-colors hover:border-text"
                 >
-                  <Linkedin className="w-5 h-5" />
+                  {s.icon}
+                  {s.label}
                 </a>
-                <a
-                  href="https://github.com/OsamaIbrhim"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-11 h-11 bg-white/5 border border-white/10 hover:border-brand-primary/40 hover:text-brand-primary text-white/70 rounded-xl flex items-center justify-center transition-all cursor-pointer"
-                  title="GitHub Profile"
-                >
-                  <Github className="w-5 h-5" />
-                </a>
-                {/* <a
-                  href={`https://wa.me/${WHATSAPP}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-11 h-11 bg-white/5 border border-white/10 hover:border-brand-primary/40 hover:text-brand-primary text-white/70 rounded-xl flex items-center justify-center transition-all cursor-pointer"
-                  title="WhatsApp"
-                >
-                  <div className="relative group/wa shrink-0">
-                    <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/15 text-emerald-400 cursor-pointer">
-
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.518 5.26l-.999 3.648 3.97-1.042zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                      </svg>
-                    </div>
-
-                    <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-brand-surface border border-white/10 text-white text-xs whitespace-nowrap opacity-0 translate-y-1 group-hover/wa:opacity-100 group-hover/wa:translate-y-0 transition-all duration-200 shadow-xl z-20">
-                      {WHATSAPP_DISPLAY}
-                      <span className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-brand-surface border-r border-b border-white/10 rotate-45 -mt-1" />
-                    </div>
-                  </div>
-                </a> */}
-              </div>
-
-              {/* WhatsApp card */}
-              <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-start gap-4 hover:border-emerald-500/20 transition-all">
-
-                <div className="relative group/wa shrink-0">
-                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/15 text-emerald-400 cursor-pointer">
-
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.518 5.26l-.999 3.648 3.97-1.042zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
-                    </svg>
-                  </div>
-
-                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-brand-surface border border-white/10 text-white text-xs whitespace-nowrap opacity-0 translate-y-1 group-hover/wa:opacity-100 group-hover/wa:translate-y-0 transition-all duration-200 shadow-xl z-20">
-                    {WHATSAPP_DISPLAY}
-                    <span className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-brand-surface border-r border-b border-white/10 rotate-45 -mt-1" />
-                  </div>
-                </div>
-
-                <div className="space-y-1 flex-1 min-w-0">
-                  <span className="label-caps !text-[9px] text-white/50 block">WhatsApp</span>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`https://wa.me/${WHATSAPP}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block text-white font-semibold text-sm sm:text-base hover:text-emerald-400 transition-colors hover:underline truncate"
-                    >
-                      {WHATSAPP_DISPLAY}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyText(WHATSAPP_DISPLAY, setCopiedPhone)}
-                      title="Copy number"
-                      className="shrink-0 p-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-emerald-500/40 text-white/60 hover:text-emerald-400 transition-all cursor-pointer"
-                    >
-                      {copiedPhone ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-
-                  <AnimatePresence>
-                    {copiedPhone && (
-                      <motion.span
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-[10px] text-emerald-400 font-semibold block"
-                      >
-                        Copied to clipboard!
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-
+              ))}
             </div>
           </div>
 
-          {/* Right Column: Interaction Form */}
-          <div className="lg:col-span-7">
-            <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden">
-              <h3 className="font-serif text-xl sm:text-2xl font-light text-white mb-6">
-                Send a Quick Message
-              </h3>
-
-              <form onSubmit={handleSendMessage} className="space-y-6">
-
-                {/* Name field */}
-                <div>
-                  <label htmlFor="name-input" className="block text-xs uppercase font-bold text-white/50 mb-2 label-caps">Your Full Name</label>
-                  <input
-                    id="name-input"
-                    type="text"
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
-                    }}
-                    placeholder="e.g. Osama Ibrahim"
-                    className={`w-full bg-black/40 border ${errors.name ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/10 focus:border-brand-primary'
-                      } rounded-xl px-5 py-3.5 text-white text-sm sm:text-base focus:outline-none transition-all placeholder:text-white/30`}
-                  />
-                  {errors.name && (
-                    <span className="text-xs text-rose-500 mt-1.5 block font-sans">{errors.name}</span>
-                  )}
-                </div>
-
-                {/* Email field */}
-                <div>
-                  <label htmlFor="email-input" className="block text-xs uppercase font-bold text-white/50 mb-2 label-caps">Email Address</label>
-                  <input
-                    id="email-input"
-                    type="text"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
-                    }}
-                    placeholder="e.g. osama@example.com"
-                    className={`w-full bg-black/40 border ${errors.email ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/10 focus:border-brand-primary'
-                      } rounded-xl px-5 py-3.5 text-white text-sm sm:text-base focus:outline-none transition-all placeholder:text-white/30`}
-                  />
-                  {errors.email && (
-                    <span className="text-xs text-rose-500 mt-1.5 block font-sans">{errors.email}</span>
-                  )}
-                </div>
-
-                {/* Message field */}
-                <div>
-                  <label htmlFor="message-input" className="block text-xs uppercase font-bold text-white/50 mb-2 label-caps">Message Contents</label>
-                  <textarea
-                    id="message-input"
-                    value={message}
-                    onChange={(e) => {
-                      setMessage(e.target.value);
-                      if (errors.message) setErrors(prev => ({ ...prev, message: undefined }));
-                    }}
-                    placeholder="Hi Osama, I would love to chat about..."
-                    rows={4}
-                    className={`w-full bg-black/40 border ${errors.message ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/10 focus:border-brand-primary'
-                      } rounded-xl px-5 py-3.5 text-white text-sm sm:text-base focus:outline-none transition-all placeholder:text-white/30 resize-none`}
-                  />
-                  {errors.message && (
-                    <span className="text-xs text-rose-500 mt-1.5 block font-sans">{errors.message}</span>
-                  )}
-                </div>
-
-                {/* Action button */}
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={formState === 'submitting'}
-                    className="w-full bg-white text-[#020205] hover:bg-white/95 disabled:opacity-50 font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-98 text-sm sm:text-base uppercase tracking-wider cursor-pointer"
-                  >
-                    {formState === 'submitting' ? (
-                      <>
-                        <RefreshCw className="w-5 h-5 animate-spin text-[#020205]" />
-                        Simulating Secure Handshake...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 text-[#020205]" />
-                        Send Message
-                      </>
-                    )}
+          <div className="lg:col-span-6 lg:col-start-7">
+            <AnimatePresence mode="wait">
+              {phase === 'sent' ? (
+                <m.div
+                  key="sent"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="rounded-[3px] border border-accent bg-accent-soft p-8"
+                >
+                  <div className="font-mono text-[11px] text-accent">BLOCK #{pad2(index)} · CONFIRMED</div>
+                  <p className="display mt-4 text-4xl">Message received.</p>
+                  <p className="mt-3 text-muted">
+                    It’s in my inbox, sealed with nonce <span className="font-mono text-text">{nonce}</span>. I’ll get back
+                    to you by email.
+                  </p>
+                  <div className="mt-4 break-all font-mono text-[11px] text-muted">{hash}</div>
+                  <button type="button" onClick={() => setPhase('idle')} className="link-underline mt-6 text-sm text-text">
+                    Write another
                   </button>
-                </div>
-              </form>
+                </m.div>
+              ) : (
+                <m.form
+                  key="form"
+                  onSubmit={onSubmit}
+                  noValidate
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-8"
+                >
+                  <Field id="c-name" label="Name" error={errors.name}>
+                    <input
+                      id="c-name"
+                      name="name"
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (errors.name) setErrors((x) => ({ ...x, name: undefined }));
+                      }}
+                      placeholder="Your name"
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field id="c-email" label="Email" error={errors.email}>
+                    <input
+                      id="c-email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors((x) => ({ ...x, email: undefined }));
+                      }}
+                      placeholder="you@company.com"
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field id="c-msg" label="Message" error={errors.message}>
+                    <textarea
+                      id="c-msg"
+                      name="message"
+                      rows={4}
+                      value={message}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        if (errors.message) setErrors((x) => ({ ...x, message: undefined }));
+                      }}
+                      placeholder="What are we building?"
+                      className={`${inputCls} resize-none`}
+                    />
+                  </Field>
 
-              {/* Simulated Success Message Popup */}
-              <AnimatePresence>
-                {formState === 'success' && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="absolute inset-0 z-30 bg-brand-surface/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 rounded-3xl"
-                  >
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.1, type: 'spring', damping: 15 }}
-                    >
-                      <CheckCircle className="w-14 h-14 text-emerald-400 mb-4" />
-                    </motion.div>
-                    <h4 className="font-display text-xl sm:text-2xl font-bold text-white mb-2">
-                      Message Sent Successfully!
-                    </h4>
-                    <p className="text-white/60 text-sm font-sans mb-6 max-w-xs">
-                      Your mock message was dispatched securely. Thank you for connecting with Osama.
-                    </p>
+                  <div className="flex flex-wrap items-center gap-5 pt-2">
                     <button
-                      type="button"
-                      onClick={() => setFormState('idle')}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer"
+                      data-magnetic
+                      type="submit"
+                      disabled={phase === 'mining'}
+                      className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-medium text-on-accent transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
                     >
-                      Send Another Message
+                      {phase === 'mining' ? `Mining… nonce ${nonce}` : 'Mine & send'}
+                      <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
                     </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    {phase === 'error' && (
+                      <span className="text-sm text-danger">That didn’t go through. Try again, or email me directly.</span>
+                    )}
+                  </div>
+                </m.form>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-      </div >
-    </section >
+      </div>
+    </section>
   );
 }

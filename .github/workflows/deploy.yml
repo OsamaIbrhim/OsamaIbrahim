@@ -23,6 +23,17 @@ jobs:
         with:
           node-version: 20
       - run: npm install
+      # Zodiak and Ranade (Fontshare, ITF Free Font License) may be self-hosted
+      # on this site but not redistributed through a public repository, so they
+      # are fetched from Fontshare at build time instead of being committed.
+      - name: Fetch Fontshare fonts
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d)
+          curl -fsSL -o "$tmp/zodiak.zip" https://api.fontshare.com/v2/fonts/download/zodiak
+          curl -fsSL -o "$tmp/ranade.zip" https://api.fontshare.com/v2/fonts/download/ranade
+          unzip -j -o "$tmp/zodiak.zip" 'Zodiak_Complete/Fonts/WEB/fonts/Zodiak-Regular.woff2' 'Zodiak_Complete/Fonts/WEB/fonts/Zodiak-Italic.woff2' -d public/fonts
+          unzip -j -o "$tmp/ranade.zip" 'Ranade_Complete/Fonts/WEB/fonts/Ranade-Regular.woff2' 'Ranade_Complete/Fonts/WEB/fonts/Ranade-Medium.woff2' -d public/fonts
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
