@@ -1,95 +1,115 @@
-import Navbar from './components/Navbar';
+import { Suspense, useEffect, type ComponentType } from 'react';
+import { LazyMotion, MotionConfig } from 'motion/react';
+import Nav from './components/Nav';
 import Hero from './components/Hero';
 import About from './components/About';
+import Marquee from './components/Marquee';
+import Stack from './components/Stack';
 import Experience from './components/Experience';
 import Projects from './components/Projects';
-import Skills from './components/Skills';
 import Education from './components/Education';
 import Contact from './components/Contact';
-import CursorWordTrail from './components/CursorWordTrail'
-import { Mail, Linkedin, Github } from 'lucide-react';
+import TamperToast from './components/TamperToast';
+import Terminal from './components/Terminal';
+import Preloader from './components/Preloader';
+import MotionDirector from './components/MotionDirector';
+import Cursor from './components/Cursor';
+import { PROFILE } from './data/profile';
+import { IntroProvider } from './lib/intro';
+import { LedgerProvider, shortHash, useLedger } from './lib/ledger';
+import { expectIslands, islandHydrated } from './lib/hydration';
 
-export default function App() {
-  const currentYear = new Date().getFullYear();
+// Motion's animation features load after first paint (see src/lib/motionFeatures.ts).
+const motionFeatures = () => import('./lib/motionFeatures').then((m) => m.default);
 
+/**
+ * A hydration boundary. The page arrives prerendered, and React hydrates each
+ * boundary as its own chunk of work, yielding to the browser in between,
+ * instead of one long task for the whole page. Nothing here suspends, so the
+ * fallback never shows.
+ */
+function Island({ id, of: Section }: { id: string; of: ComponentType }) {
   return (
-    <div className="bg-brand-bg text-white min-h-screen font-sans antialiased overflow-x-hidden selection:bg-brand-primary/30 selection:text-white">
-      {/* Immersive Atmospheric Grid Overlays */}
-      <div className="atmosphere" />
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
+    <Suspense fallback={null}>
+      <Section />
+      <Hydrated id={id} />
+    </Suspense>
+  );
+}
+function Hydrated({ id }: { id: string }) {
+  useEffect(() => islandHydrated(id), [id]);
+  return null;
+}
 
-      {/* Top sticky navbar */}
-      <Navbar />
-
-      {/* Core Portfolio Sections */}
-      <main className="relative z-10">
-        <CursorWordTrail />
-        <Hero />
-        <About />
-        <Experience />
-        <Projects />
-        <Skills />
-        <Education />
-        <Contact />
-      </main>
-
-      {/* Professional Footer Component */}
-      <footer className="relative z-10 border-t border-white/5 bg-brand-surface py-12 md:py-16 overflow-hidden">
-        {/* Subtle decorative bottom glow */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[150px] bg-brand-primary/5 rounded-full blur-[90px] pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-6 md:px-8 flex flex-col md:flex-row justify-between items-center gap-8">
-          
-          {/* Logo & Credits block */}
-          <div className="space-y-3 text-center md:text-left">
-            <div className="flex justify-center md:justify-start items-center gap-2.5 font-display text-lg font-bold">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-brand-bg font-extrabold text-sm">
-                O
-              </div>
-              <span className="text-white">Osama Ibrahim</span>
-            </div>
-            <p className="text-on-surface-variant text-xs sm:text-sm font-sans">
-              Professional Full Stack MERN Developer Portfolio. Deployed securely.
-            </p>
+function Footer() {
+  const { head, blocks, ready } = useLedger();
+  return (
+    <footer className="relative overflow-hidden border-t border-line">
+      <div className="mx-auto max-w-[1320px] px-4 py-10 sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-4 font-mono text-[11px] text-muted sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            chain height {blocks.length} · head {ready ? shortHash(head, 10, 6) : 'mining…'} · press ` for a terminal
+            <br />
+            built with React, TypeScript, GSAP, three.js, Web Crypto SHA-256, and a lot of tea.
           </div>
-
-          {/* Social Links Row */}
-          <div className="flex flex-col items-center md:items-end gap-4">
-            <div className="flex gap-4">
-              <a
-                href="mailto:osamaibrahim1948@gmail.com"
-                className="w-10 h-10 rounded-lg bg-brand-surface-high border border-white/5 hover:border-brand-primary/30 text-on-surface-variant hover:text-brand-primary flex items-center justify-center transition-colors cursor-pointer"
-                title="Send Email"
-              >
-                <Mail className="w-4 h-4" />
-              </a>
-              <a
-                href="https://www.linkedin.com/in/osamaibrhim"
-                target="_blank"
-                rel="noreferrer"
-                className="w-10 h-10 rounded-lg bg-brand-surface-high border border-white/5 hover:border-brand-primary/30 text-on-surface-variant hover:text-brand-primary flex items-center justify-center transition-colors cursor-pointer"
-                title="LinkedIn"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="https://github.com/OsamaIbrhim"
-                target="_blank"
-                rel="noreferrer"
-                className="w-10 h-10 rounded-lg bg-brand-surface-high border border-white/5 hover:border-brand-primary/30 text-on-surface-variant hover:text-brand-primary flex items-center justify-center transition-colors cursor-pointer"
-                title="GitHub"
-              >
-                <Github className="w-4 h-4" />
-              </a>
-            </div>
-            
-            <span className="text-[11px] text-on-surface-variant/75 font-mono">
-              &copy; {currentYear} Osama Ibrahim. All Rights Reserved.
+          <div className="sm:text-right">
+            <span suppressHydrationWarning>©&nbsp;{new Date().getFullYear()}</span> {PROFILE.name}
+            <br />
+            <span lang="ar" dir="rtl" className="font-arabic text-[17px] font-bold text-accent">
+              {PROFILE.nameAr}
             </span>
           </div>
-
         </div>
-      </footer>
-    </div>
+      </div>
+    </footer>
+  );
+}
+
+// Everything below the hero hydrates as separate chunks (see Island).
+const MAIN: Array<[string, ComponentType]> = [
+  ['about', About],
+  ['marquee', Marquee],
+  ['stack', Stack],
+  ['experience', Experience],
+  ['projects', Projects],
+  ['education', Education],
+  ['contact', Contact],
+];
+const AFTER: Array<[string, ComponentType]> = [
+  ['footer', Footer],
+  ['toast', TamperToast],
+  ['terminal', Terminal],
+];
+expectIslands([...MAIN, ...AFTER].map(([id]) => id));
+
+export default function App() {
+  return (
+    <LazyMotion features={motionFeatures} strict>
+      <MotionConfig reducedMotion="user">
+        <IntroProvider>
+          <LedgerProvider>
+            <a
+              href="#about"
+              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[95] focus:rounded-full focus:bg-text focus:px-4 focus:py-2 focus:text-bg"
+            >
+              Skip to content
+            </a>
+            <Preloader />
+            <MotionDirector />
+            <Cursor />
+            <Nav />
+            <main className="w-full max-w-full overflow-x-clip">
+              <Hero />
+              {MAIN.map(([id, Section]) => (
+                <Island key={id} id={id} of={Section} />
+              ))}
+            </main>
+            {AFTER.map(([id, Section]) => (
+              <Island key={id} id={id} of={Section} />
+            ))}
+          </LedgerProvider>
+        </IntroProvider>
+      </MotionConfig>
+    </LazyMotion>
   );
 }

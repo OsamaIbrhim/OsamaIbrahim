@@ -1,306 +1,147 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, CheckCircle2, Cpu, Code2, Database, Globe, Layers, Sparkles } from 'lucide-react';
-import osamaIcon from "/src/assets/images/os.ico"
+import { useEffect, useState, type CSSProperties } from 'react';
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import BlockFrame from './BlockFrame';
+import Claim from './Claim';
+import HeroCanvas from './HeroCanvas';
+import { openTerminal } from './Terminal';
+import { PROFILE } from '../data/profile';
+import { useLedger } from '../lib/ledger';
+import { scrollToId } from '../lib/scroll';
 
-const codeSnippets = {
-  typescript: `export const engineer = {
-  name: 'Osama Ibrahim',
-  role: 'Full Stack MERN Developer',
-  stack: [
-    'React', 'Node.js',
-    'MongoDB', 'Solidity'
-  ],
-  build() {
-    return 'Scalable Solutions';
-  }
-};`,
-  solidity: `contract Credentials {
-  struct Record {
-    string hash;
-    uint256 timestamp;
-  }
-  
-  mapping(address => Record) public docs;
+/** Staggered entrance, run by CSS from the first paint (see .hero-in / .hero-rise in index.css). */
+const delay = (s: number): CSSProperties => ({ animationDelay: `${s}s` });
 
-  function verify(string memory _hash) public {
-    docs[msg.sender] = Record(_hash, block.timestamp);
-  }
-}`,
-  telemetry: `[System Init] Booting stack...
-[Database] MongoDB connection established.
-[API] Listening on port 3000.
-[Web3] Syncing contract with Sepolia.
-[Status] Fully Operational.`
-};
+function CairoClock() {
+  // Unknown until the page is running in a browser (the HTML is prerendered);
+  // a hidden placeholder of the same width keeps the line from shifting.
+  const [time, setTime] = useState<string | null>(null);
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit' });
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const t = setInterval(tick, 15_000);
+    return () => clearInterval(t);
+  }, []);
+  return <span className={`tabular ${time ? '' : 'invisible'}`}>{time ?? '00:00'}</span>;
+}
+
+/** A word that rises into view from behind its baseline. */
+function Rise({ word, at, italic }: { word: string; at: number; italic?: boolean }) {
+  return (
+    <span className={`inline-block overflow-hidden pb-[0.1em] align-bottom ${italic ? 'italic' : ''}`}>
+      <span className="hero-rise" style={delay(at)}>
+        {word}
+      </span>
+    </span>
+  );
+}
 
 export default function Hero() {
-  const [activeTab, setActiveTab] = useState<'typescript' | 'solidity' | 'telemetry'>('typescript');
-  const [typingText, setTypingText] = useState('');
-  const [systemUptime, setSystemUptime] = useState(0);
-  const [cpuLoad, setCpuLoad] = useState(12);
-
-  // Periodic updates for simulated telemetry
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSystemUptime(prev => prev + 1);
-      setCpuLoad(Math.floor(Math.random() * 25) + 10);
-    }, 1500);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Smooth typing effect for the active snippet
-  useEffect(() => {
-    let index = 0;
-    const fullText = codeSnippets[activeTab];
-    setTypingText('');
-
-    const interval = setInterval(() => {
-      if (index < fullText.length) {
-        setTypingText(fullText.slice(0, index + 1));
-        index++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 12);
-
-    return () => clearInterval(interval);
-  }, [activeTab]);
-
-  const handleScrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const { ready, blocks, available } = useLedger();
 
   return (
-    <section
-      id="home"
-      className="relative min-h-[90vh] flex flex-col justify-center py-20 bg-gradient-premium overflow-hidden"
-    >
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-brand-primary/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-brand-tertiary/5 rounded-full blur-[120px] pointer-events-none" />
+    <div className="relative overflow-hidden">
+      <HeroCanvas />
+      {/* A soft wash so the type always reads over the 3D scene. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'radial-gradient(120% 90% at 15% 95%, var(--bg) 25%, transparent 70%)' }}
+      />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-8 relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-        
-        {/* Left Column - Intro Information */}
-        <div className="lg:col-span-7 flex flex-col items-start text-left space-y-6 md:space-y-8">
-          
-          {/* Portrait & Available Badge row */}
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Portrait Avatar - matching second design beautifully */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="relative lg:hidden w-16 h-16 rounded-full border-2 border-brand-primary/30 p-0.5 overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.2)]"
-            >
-              <img
-                src={osamaIcon}
-                alt="Osama Ibrahim"
-                className="w-full h-full object-cover rounded-full"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
+      <BlockFrame index={0} className="pt-24 sm:pt-28">
+        <div data-hero-out className="flex min-h-[calc(100svh-15rem)] flex-col">
+          <p className="hero-in eyebrow flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="text-accent">●</span>
+            <span className="text-text">{PROFILE.role}</span>
+            <span className="text-faint">/</span>
+            <span>{PROFILE.discipline}</span>
+            <span className="hidden text-faint sm:inline">/</span>
+            <span className="hidden sm:inline">
+              {PROFILE.location} · <CairoClock /> Cairo
+            </span>
+          </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md"
-            >
-              <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
-              <span className="label-caps !text-[10px] text-white/75">
-                Available for opportunities
+          <div className="flex-1" />
+
+          <h1 className="display mt-2 text-[clamp(4.5rem,11.5vw,11rem)] leading-[0.86] text-text">
+            <span className="sr-only">{PROFILE.name}</span>
+            <span aria-hidden className="block">
+              <Rise word="Osama" at={0.05} />
+            </span>
+            <span aria-hidden className="flex flex-wrap items-end gap-x-6">
+              <Rise word="Ibrahim" at={0.15} italic />
+              <span
+                lang="ar"
+                dir="rtl"
+                className="hero-in mb-[0.5em] hidden font-arabic text-[clamp(1.5rem,2.8vw,2.6rem)] font-bold leading-none tracking-normal text-accent sm:inline"
+                style={delay(0.6)}
+              >
+                {PROFILE.nameAr}
               </span>
-            </motion.div>
+            </span>
+          </h1>
+
+          <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-end">
+            <div className="hero-in lg:col-span-7" style={delay(0.3)}>
+              <p className="max-w-[40rem] font-serif text-[clamp(1.4rem,2.1vw,1.85rem)] leading-[1.2] text-text">
+                <Claim index={0} />
+              </p>
+              <p className="mt-4 max-w-[36rem] font-mono text-[11.5px] leading-relaxed text-muted">
+                {!available ? (
+                  <>This page’s live chain needs a secure (HTTPS) connection.</>
+                ) : ready ? (
+                  <>
+                    <span className="text-accent">✎</span> That sentence is sealed in block #00 with a real SHA-256
+                    hash, and so is every section below. Change a word and watch the chain react, or{' '}
+                    <button
+                      type="button"
+                      onClick={openTerminal}
+                      className="text-text underline decoration-dotted underline-offset-4 hover:text-accent"
+                    >
+                      open the terminal
+                    </button>
+                    .
+                  </>
+                ) : (
+                  <>
+                    <span className="pulse-dot text-warn">⛏</span> Mining this page’s {blocks.length} blocks in your
+                    browser…
+                  </>
+                )}
+              </p>
+            </div>
+
+            <div className="hero-in flex flex-wrap items-center gap-3 lg:col-span-5 lg:justify-end" style={delay(0.4)}>
+              <button
+                type="button"
+                data-magnetic
+                onClick={() => scrollToId('projects')}
+                className="group inline-flex items-center gap-2 rounded-full bg-text px-6 py-3.5 text-sm font-medium text-bg"
+              >
+                See the work
+                <ArrowDownRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-[-45deg]" />
+              </button>
+              <button
+                type="button"
+                data-magnetic
+                onClick={() => scrollToId('contact')}
+                className="inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3.5 text-sm font-medium text-text transition-colors hover:border-text"
+              >
+                Get in touch
+              </button>
+              <a
+                href={PROFILE.resume}
+                target="_blank"
+                rel="noreferrer"
+                className="link-underline ml-1 inline-flex items-center gap-1 text-sm text-muted hover:text-text"
+              >
+                Résumé <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
           </div>
-
-          {/* Dynamic Headline */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-            className="space-y-3"
-          >
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white leading-[1.1] tracking-tight">
-              Building Digital <br />
-              <span className="text-gradient italic font-normal">Experiences</span>
-            </h1>
-          </motion.div>
-
-          {/* Subheading description */}
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="font-sans text-base sm:text-lg md:text-xl text-white/60 max-w-xl leading-relaxed"
-          >
-            Early-Career Full Stack Software Engineer bridging robust backend architectures with seamless frontend experiences. Passionate about Web3 and scalable applications with 8+ months of experience.
-          </motion.p>
-
-          {/* Interactive Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="flex flex-wrap gap-4 w-full sm:w-auto"
-          >
-            <button
-              onClick={() => handleScrollTo('projects')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#020205] hover:bg-white/90 font-bold text-base px-8 py-4 rounded-full transition-all hover:scale-102 duration-300 cursor-pointer"
-            >
-              View Projects
-              <ArrowRight className="w-4 h-4 text-[#020205]" />
-            </button>
-            <button
-              onClick={() => handleScrollTo('contact')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-transparent text-white border border-white/20 hover:border-white/50 hover:bg-white/5 font-semibold text-base px-8 py-4 rounded-full transition-all hover:scale-102 duration-300 cursor-pointer"
-            >
-              Contact Me
-            </button>
-          </motion.div>
         </div>
-
-        {/* Right Column - Terminal Showcase */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.7 }}
-          className="lg:col-span-5 relative w-full aspect-[4/3] md:aspect-[1.25] max-w-[550px] mx-auto z-10"
-        >
-          {/* Subtle frame border glow */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-brand-primary/20 to-brand-tertiary/10 rounded-2xl blur-xl opacity-80" />
-
-          {/* Main Glass Panel */}
-          <div className="glass-panel rounded-2xl w-full h-full relative overflow-hidden flex flex-col shadow-2xl border-white/10">
-            
-            {/* Terminal Top Window Bar */}
-            <div className="bg-brand-surface/90 px-4 py-3.5 flex justify-between items-center border-b border-white/5">
-              <div className="flex gap-2">
-                <div className="w-3.5 h-3.5 rounded-full bg-red-500/80 hover:scale-105 transition-transform" />
-                <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/80 hover:scale-105 transition-transform" />
-                <div className="w-3.5 h-3.5 rounded-full bg-green-500/80 hover:scale-105 transition-transform" />
-              </div>
-              <div className="font-mono text-xs text-white/50">developer@osama-ibrahim:~</div>
-              <div className="w-12" /> {/* spacer */}
-            </div>
-
-            {/* Dashboard / Telemetry Top Stats */}
-            <div className="px-6 py-4 bg-brand-surface/40 flex justify-between items-center border-b border-white/5">
-              <div className="space-y-0.5">
-                <div className="text-[10px] uppercase tracking-wider font-semibold text-white/40">System Status</div>
-                <div className="text-sm font-bold text-brand-primary flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-brand-primary animate-pulse" />
-                  ONLINE
-                </div>
-              </div>
-              
-              {/* Tabs selector */}
-              <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
-                <button
-                  onClick={() => setActiveTab('typescript')}
-                  className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded transition-colors cursor-pointer ${
-                    activeTab === 'typescript' ? 'bg-brand-primary/20 text-brand-primary' : 'text-white/50 hover:text-white'
-                  }`}
-                >
-                  Specs
-                </button>
-                <button
-                  onClick={() => setActiveTab('solidity')}
-                  className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded transition-colors cursor-pointer ${
-                    activeTab === 'solidity' ? 'bg-brand-primary/20 text-brand-primary' : 'text-white/50 hover:text-white'
-                  }`}
-                >
-                  Web3
-                </button>
-                <button
-                  onClick={() => setActiveTab('telemetry')}
-                  className={`px-2.5 py-1 text-[11px] font-mono font-medium rounded transition-colors cursor-pointer ${
-                    activeTab === 'telemetry' ? 'bg-brand-primary/20 text-brand-primary' : 'text-white/50 hover:text-white'
-                  }`}
-                >
-                  Logs
-                </button>
-              </div>
-            </div>
-
-            {/* Code Snippet / Logger Body */}
-            <div className="p-6 flex-1 flex flex-col justify-between overflow-hidden bg-brand-bg/60 font-mono text-xs relative">
-              <div className="absolute right-4 top-4 text-[10px] text-white/30 select-none uppercase">
-                {activeTab === 'typescript' ? 'TypeScript' : activeTab === 'solidity' ? 'Solidity' : 'Live Output'}
-              </div>
-
-              <div className="overflow-y-auto max-h-[160px] md:max-h-[180px] scrollbar-thin text-white/80 leading-relaxed whitespace-pre pr-2">
-                <code>
-                  {activeTab === 'telemetry' ? (
-                    <div className="space-y-1 text-green-400">
-                      <div>{`> uptime: ${systemUptime}s | CPU Load: ${cpuLoad}%`}</div>
-                      <div>{typingText}</div>
-                    </div>
-                  ) : activeTab === 'typescript' ? (
-                    <div>
-                      <span className="text-pink-400">export const</span> <span className="text-brand-primary font-bold">engineer</span> = &#123;
-                      <br />
-                      &nbsp;&nbsp;name: <span className="text-emerald-400">'Osama Ibrahim'</span>,
-                      <br />
-                      &nbsp;&nbsp;role: <span className="text-emerald-400">'Full Stack MERN Developer'</span>,
-                      <br />
-                      &nbsp;&nbsp;stack: [
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'React'</span>, <span className="text-emerald-400">'Node.js'</span>,
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'MongoDB'</span>, <span className="text-emerald-400">'Solidity'</span>
-                      <br />
-                      &nbsp;&nbsp;],
-                      <br />
-                      &nbsp;&nbsp;build() &#123;
-                      <br />
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-400">return</span> <span className="text-emerald-400">'Scalable Solutions'</span>;
-                      <br />
-                      &nbsp;&nbsp;&#125;
-                      <br />
-                      &#125;;
-                    </div>
-                  ) : (
-                    <div className="text-purple-300">
-                      {typingText}
-                    </div>
-                  )}
-                </code>
-              </div>
-
-              {/* Activity Sparkline (mock commits graph from screenshot) */}
-              <div className="mt-4 pt-3 border-t border-white/5 flex items-end gap-1.5 h-12 justify-between">
-                {[45, 60, 35, 75, 50, 95, 40, 85, 65, 80, 55, 30, 70, 90, 45].map((val, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ height: 0 }}
-                    animate={{ height: `${val}%` }}
-                    transition={{
-                      delay: i * 0.03,
-                      type: 'spring',
-                      stiffness: 80,
-                      damping: 10,
-                      repeat: Infinity,
-                      repeatType: 'reverse',
-                      repeatDelay: 5 + Math.random() * 5
-                    }}
-                    className={`w-full rounded-sm ${
-                      activeTab === 'solidity'
-                        ? 'bg-brand-tertiary/40 group-hover:bg-brand-tertiary'
-                        : activeTab === 'telemetry'
-                        ? 'bg-emerald-500/40'
-                        : 'bg-brand-primary/40'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+      </BlockFrame>
+    </div>
   );
 }

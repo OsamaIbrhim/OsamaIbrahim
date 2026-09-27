@@ -5,3 +5,17 @@ node_modules
 .DS_Store
 .log
 .env
+
+# Build-time prerender output (scripts/prerender.mjs removes it)
+dist-ssr/
+
+# Fontshare fonts: licensed for self-hosting, not for redistribution in a
+# public repo. The deploy workflow downloads them from Fontshare.
+public/fonts/Zodiak-*.woff2
+public/fonts/Ranade-*.woff2
+
+# The original, unoptimised ship upload (the site uses src/assets/models/ship.glb)
+/tiny_planet_friends_3d-pirate-ship-4605.glb
+
+# Local tooling
+.claude/
