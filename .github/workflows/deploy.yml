@@ -18,11 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - run: npm install
+          node-version: 22
+      - run: npm ci
       # Zodiak and Ranade (Fontshare, ITF Free Font License) may be self-hosted
       # on this site but not redistributed through a public repository, so they
       # are fetched from Fontshare at build time instead of being committed.
