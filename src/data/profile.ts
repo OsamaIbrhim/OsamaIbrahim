@@ -18,6 +18,22 @@ export const PROFILE = {
 export const EXPERIENCE = [
   {
     role: 'Full Stack Developer',
+    kind: 'Freelance',
+    company: 'Skrps',
+    product: 'E-commerce store',
+    period: 'Oct 2026 – Present',
+    duration: 'ongoing',
+    note: 'Live client store for medical scrubs in Egypt.',
+    stack: ['Next.js', 'SQLite (Turso)', 'Vercel'],
+    highlights: [
+      'Built the storefront end to end: catalog, cart, guest checkout, and order tracking by order number and phone.',
+      'Built an admin dashboard for a non-technical owner to manage orders, products, stock, categories, shipping fees and staff.',
+      'Integrated cash on delivery and InstaPay payments with per-governorate delivery fees.',
+      'Owned performance and code quality: reviewed and merged all pull requests, ran security review, load testing and frontend/backend audits.',
+    ],
+  },
+  {
+    role: 'Full Stack Developer',
     kind: 'Internship',
     company: 'DigiCrafterz',
     product: 'Sendifier CRM',

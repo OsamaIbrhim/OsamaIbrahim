@@ -19,3 +19,6 @@ public/fonts/Ranade-*.woff2
 
 # Local tooling
 .claude/
+
+# AI working files (reports, screenshots, notes)
+.ai-workspace/
