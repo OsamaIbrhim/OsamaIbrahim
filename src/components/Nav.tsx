@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { flushSync } from 'react-dom';
 import { AnimatePresence, m } from 'motion/react';
-import { Rocket, Sailboat, SquareTerminal } from 'lucide-react';
+import { Download, Rocket, Sailboat, SquareTerminal } from 'lucide-react';
 import { PROFILE } from '../data/profile';
 import { pad2, useLedger } from '../lib/ledger';
 import { useIntro } from '../lib/intro';
@@ -164,6 +164,14 @@ export default function Nav() {
 
           <div className="ml-auto flex items-center gap-2 xl:ml-4">
             <ChainPill />
+            <a
+              href={PROFILE.resume}
+              download="Osama_Ibrahim_CV.pdf"
+              className="hidden h-9 items-center gap-1.5 rounded-full border border-accent/60 px-3.5 font-mono text-[11px] text-accent transition-colors hover:bg-accent hover:text-bg md:inline-flex"
+            >
+              <Download className="h-3.5 w-3.5" />
+              CV
+            </a>
             <button
               type="button"
               onClick={openTerminal}
@@ -224,8 +232,8 @@ export default function Nav() {
                 </m.li>
               ))}
             </ul>
-            <a href={PROFILE.resume} target="_blank" rel="noreferrer" className="mt-8 inline-block font-mono text-sm text-accent">
-              Résumé ↗
+            <a href={PROFILE.resume} download="Osama_Ibrahim_CV.pdf" className="mt-8 inline-flex items-center gap-2 font-mono text-sm text-accent">
+              <Download className="h-4 w-4" /> Download CV
             </a>
           </m.nav>
         )}

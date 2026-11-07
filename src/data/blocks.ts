@@ -35,7 +35,7 @@ export const BLOCKS: BlockDef[] = [
     id: 'experience',
     nav: 'Experience',
     label: 'Record',
-    claim: 'Eight months shipping production MERN features on a real CRM platform.',
+    claim: 'A live store for a client today, and eight months of production features on a real CRM before it.',
   },
   {
     index: 4,

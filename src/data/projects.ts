@@ -6,6 +6,7 @@ import youtubeImage from '../assets/images/youtube.webp';
 import doctorImage from '../assets/images/doctorAPI.webp';
 import nookImage from '../assets/images/nook.webp';
 import jobCatcherImage from '../assets/images/jobcatcher.webp';
+import skrpsImage from '../assets/images/skrps.webp';
 
 export const STATUS_LABEL: Record<ProjectStatus, string> = {
   live: 'Live',
@@ -15,6 +16,29 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
 };
 
 export const projects: Project[] = [
+  {
+    id: 'skrps',
+    title: 'Skrps',
+    description:
+      'A live e-commerce store for medical scrubs in Egypt, built as a freelance project: the storefront customers buy from and the dashboard the owner runs the shop with.',
+    longDescription:
+      'Freelance client work, built end to end with Next.js on SQLite (Turso) and deployed on Vercel. Customers browse the catalog, check out as guests and track their orders; the owner, who is not technical, manages orders, products, stock, categories, shipping fees and staff from an admin dashboard.',
+    category: 'fullstack',
+    status: 'live',
+    note: 'Live on a temporary domain until the client buys theirs; a few finishing touches in progress.',
+    visual: 'image',
+    featured: true,
+    tags: ['Next.js', 'SQLite (Turso)', 'Vercel', 'Cash on delivery', 'InstaPay'],
+    image: skrpsImage,
+    liveUrl: 'https://skrps.vercel.app/en',
+    githubUrl: '#',
+    highlights: [
+      'Storefront built end to end: catalog, cart, guest checkout, and order tracking by order number and phone.',
+      'Admin dashboard for a non-technical owner to manage orders, products, stock, categories, shipping fees and staff.',
+      'Cash on delivery and InstaPay payments, with delivery fees set per governorate.',
+      'Owned performance and code quality: reviewed and merged every pull request, ran a security review, load testing and frontend/backend audits.',
+    ],
+  },
   {
     id: 'nook',
     title: 'Nook',

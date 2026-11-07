@@ -8,7 +8,7 @@ const FACTS = [
   ['Role', `${PROFILE.role}, ${PROFILE.discipline.toLowerCase()}`],
   ['Based in', `${PROFILE.location}, ${PROFILE.availability.toLowerCase()}`],
   ['Degree', `${DEGREE.title}, ${DEGREE.school} (${DEGREE.period})`],
-  ['Experience', '8 months in production, full-stack MERN'],
+  ['Experience', 'Freelance client store, plus an 8-month CRM internship'],
   ['Languages', 'Arabic (native), English (professional)'],
   ['Open source', '@osamaibrahim/rate-limiter on npm'],
   ['Fuel', 'Tea. A lot of it. It is load-bearing.'],
@@ -52,7 +52,8 @@ export default function About() {
             <p data-scrub-words>
               I’m a software engineer and full-stack developer with a Computer Science &amp; Pure Mathematics degree and 8 months in
               production, where I built features for a CRM on the MERN stack: MongoDB schemas, Express APIs, React
-              interfaces, all the way down.
+              interfaces, all the way down. Today I’m building and running a live e-commerce store for a client as a
+              freelancer.
             </p>
             <p data-scrub-words>
               What I care about is software that stays correct when things go wrong: prices calculated on the server
