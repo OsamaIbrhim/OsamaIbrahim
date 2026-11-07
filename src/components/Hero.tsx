@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react';
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { ArrowDownRight, Download } from 'lucide-react';
 import BlockFrame from './BlockFrame';
 import Claim from './Claim';
 import HeroCanvas from './HeroCanvas';
@@ -132,11 +132,12 @@ export default function Hero() {
               </button>
               <a
                 href={PROFILE.resume}
-                target="_blank"
-                rel="noreferrer"
-                className="link-underline ml-1 inline-flex items-center gap-1 text-sm text-muted hover:text-text"
+                download="Osama_Ibrahim_CV.pdf"
+                data-magnetic
+                className="inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3.5 text-sm font-medium text-text transition-colors hover:border-accent hover:text-accent"
               >
-                Résumé <ArrowUpRight className="h-3.5 w-3.5" />
+                <Download className="h-4 w-4" />
+                Download CV
               </a>
             </div>
           </div>

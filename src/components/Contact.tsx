@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { AnimatePresence, m } from 'motion/react';
-import { ArrowUpRight, Check, Copy, Github, Linkedin } from 'lucide-react';
+import { ArrowUpRight, Check, Copy, Download, Github, Linkedin } from 'lucide-react';
 import { PROFILE } from '../data/profile';
 import { DIFFICULTY, hashingAvailable, mine, pad2, sha256, shortHash, useLedger } from '../lib/ledger';
 
@@ -235,6 +235,15 @@ export default function Contact() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
+              <a
+                href={PROFILE.resume}
+                download="Osama_Ibrahim_CV.pdf"
+                className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90"
+              >
+                <Download className="h-4 w-4" />
+                Download CV
+                <span className="font-mono text-[11px] opacity-70">PDF</span>
+              </a>
               {[
                 { label: 'LinkedIn', href: PROFILE.linkedin, icon: <Linkedin className="h-4 w-4" /> },
                 { label: 'GitHub', href: PROFILE.github, icon: <Github className="h-4 w-4" /> },
